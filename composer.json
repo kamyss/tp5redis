@@ -29,5 +29,8 @@
     },
     "config": {
         "preferred-install": "dist"
+    },
+    "require": {
+        "qcloud/cos-sdk-v5": ">=1.0"
     }
 }
