@@ -3,6 +3,7 @@ namespace app\index\controller;
 use think\Db;
 use think\cache\driver\Redis;
 use qcloud\cos\Qcloud;
+use OSS\OssClient;
 
 class Index
 {
@@ -85,6 +86,33 @@ class Index
         ];
         return $config;
     }
+    //文件上传
+    public function upload2(){
+          // 获取表单上传文件 例如上传了001.jpg
+          $file = request()->file('file');
+        
+          // 移动到框架应用根目录/public/uploads/ 目录下
+          if($file){
+              $info = $file->move('uploads');
+              dump($info);
+              die;
+             
+              if($info){
+                  // 成功上传后 获取上传信息
+                  // 输出 jpg
+               //   echo $info->getExtension();
+                  // 输出 20160820/42a79759f284b767dfcb2a0197904287.jpg
+                 // echo $info->getSaveName();
+                  // 输出 42a79759f284b767dfcb2a0197904287.jpg
+                 // echo $info->getFilename(); 
+                 echo json_encode(array('errcode'=>0,'filePath'=>'uploads/'.$info->getSaveName()));
+                 exit;
+              }else{
+                  // 上传失败获取错误信息
+                  echo $file->getError();
+              }
+          }
+    }
     //对腾讯云的oss进行测试
     public function upload(){
         $qclound=new Qcloud();
@@ -103,15 +131,14 @@ class Index
             } catch (\Exception $e) {
         //    echo "$e\n";
         }
-
-        // dump( $_FILES['file']['tmp_name']);
-        // die;
+        $body=file_get_contents($_FILES['file']['tmp_name']);
+     //   $folder=$cosClient->createFolder('picspace',"/sub3/");
          #uploadbigfile
          try {
             $result = $cosClient->upload(
                 $bucket='picspace-1251731674',
-                $key = $_FILES['file']['tmp_name'],
-                $body = str_repeat('a', 5* 1024 * 1024),
+                $key = '/test/'.$_FILES['file']['name'],
+                $body = $body,
                 $options = array(
                     "ACL"=>'private',
                     'CacheControl' => 'private',
@@ -121,5 +148,17 @@ class Index
            // echo "$e\n";
         }
 
+    }
+    //对阿里云的Oss进行操作
+    public function alupload(){
+        $ossClient=new OssClient('LTAIMEYgzFiSJjFO','7JIVLmLdT21V79NZl6sC2ZGo7jI31P','oss-cn-shenzhen.aliyuncs.com');
+        $content=file_get_contents($_FILES['file']['tmp_name']);
+        $bucket='picspace2';
+        try {
+            $result=$ossClient->putObject($bucket, 'hhj2/'.$_FILES['file']['name'], $content);
+            dump($result);
+        } catch (OssException $e) {
+            print $e->getMessage();
+        }
     }
 }

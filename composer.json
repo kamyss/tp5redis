@@ -32,5 +32,8 @@
     },
     "require": {
         "qcloud/cos-sdk-v5": ">=1.0"
+    },
+    "require": {
+        "aliyuncs/oss-sdk-php": "~2.0"
     }
 }
